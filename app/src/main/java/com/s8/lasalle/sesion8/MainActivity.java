@@ -55,12 +55,15 @@ public class MainActivity extends AppCompatActivity {
         ProductosSupermercado = new ArrayList<>();
         Lista = (ListView) findViewById(R.id.Lista);
 
+        /** SI HAY INTERNET DESCARGA JSON
+         *  SI NO HAY CARGA SQLite **/
         if(isNetworkAvailable(this)) {
             new GetProducts().execute();
         } else {
             CargarSQLite();
         }
 
+        /** BOTON UPDATE **/
         Button update = (Button) findViewById(R.id.button);
         update.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,7 +71,13 @@ public class MainActivity extends AppCompatActivity {
                 // Limpiamos la lista vieja
                 ProductosSupermercado.clear();
                 // Y la actualizamos
-                new GetProducts().execute();
+                /** SI HAY INTERNET DESCARGA JSON
+                 *  SI NO HAY CARGA SQLite **/
+                if(isNetworkAvailable(getApplicationContext())) {
+                    new GetProducts().execute();
+                } else {
+                    CargarSQLite();
+                }
                 Toast toast = Toast.makeText(getApplicationContext(), "Lista actualizada", Toast.LENGTH_SHORT);
                 toast.show();
             }
@@ -97,8 +106,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class GetProducts extends AsyncTask<Void, Void, Void> {
-
-
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -222,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
             Lista.setAdapter(adapter);
         }
     }
-
+     /** ADAPTADOR PARA SQLite **/
     class AdaptadorSQL extends ArrayAdapter<Producto> {
 
         List<Producto> _data;
@@ -246,13 +253,20 @@ public class MainActivity extends AppCompatActivity {
 
             manufacturer.setText(_data.get(position).getMANUFACTURER());
             product_name.setText(_data.get(position).getPRODUCT_NAME());
-            price.setText(_data.get(position).getPRICE());
+            price.setText(_data.get(position).getPRICE() + "€");
             stock.setText(_data.get(position).getSTOCK());
+
+            if (position%2==0) {
+                view.setBackgroundColor(Color.parseColor("#d5efef"));
+            } else {
+                view.setBackgroundColor(Color.parseColor("#efefef"));
+            }
 
             return(view);
         }
     }
 
+    /** COMPROVACIÓN INTERNET **/
     public boolean isNetworkAvailable(final Context context) {
         final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
