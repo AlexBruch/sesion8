@@ -61,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
             new GetProducts().execute();
         } else {
             CargarSQLite();
+            Toast toast = Toast.makeText(getApplicationContext(), "Conectese a Internet para tener los datos actualizados", Toast.LENGTH_LONG);
+            toast.show();
         }
 
         /** BOTON UPDATE **/
@@ -68,18 +70,18 @@ public class MainActivity extends AppCompatActivity {
         update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Limpiamos la lista vieja
-                ProductosSupermercado.clear();
-                // Y la actualizamos
                 /** SI HAY INTERNET DESCARGA JSON
                  *  SI NO HAY CARGA SQLite **/
                 if(isNetworkAvailable(getApplicationContext())) {
+                    // Limpiamos la lista vieja
+                    ProductosSupermercado.clear();
                     new GetProducts().execute();
+                    Toast toast = Toast.makeText(getApplicationContext(), "Lista actualizada", Toast.LENGTH_SHORT);
+                    toast.show();
                 } else {
-                    CargarSQLite();
+                    Toast toast = Toast.makeText(getApplicationContext(), "Es necesario conexión a Internet para actualizar", Toast.LENGTH_LONG);
+                    toast.show();
                 }
-                Toast toast = Toast.makeText(getApplicationContext(), "Lista actualizada", Toast.LENGTH_SHORT);
-                toast.show();
             }
         });
     }
@@ -87,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void CargarSQLite(){
 
-        //itemsDatasource.cleanTable();
         Cursor cursor = itemsDatasource.consultProducts();
 
         while (cursor.moveToNext()) {
@@ -121,6 +122,9 @@ public class MainActivity extends AppCompatActivity {
         protected Void doInBackground(Void... arg0) {
             HttpHandler httpHandler = new HttpHandler();
 
+            // limpiamos la base de datos antigua
+            itemsDatasource.cleanTable();
+
             // request to json data url and getting response
             String jsonString = httpHandler.makeServiceCall(Jsonurl);
             Log.e(TAG, "Response from url: " + jsonString);
@@ -153,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                         // guardamos los datos en la base de datos
                         itemsDatasource.saveProduct(fabricante, nombre, precio, stock);
 
-                        // adding contact to contact list
+                        // añadimos el producto a la lista
                         ProductosSupermercado.add(product);
 
                     }

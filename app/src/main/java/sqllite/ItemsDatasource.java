@@ -62,6 +62,6 @@ public class ItemsDatasource {
     }
 
     public void cleanTable() {
-        sqLiteDatabase.execSQL("delete * from " + PRODUCTS_TABLE_NAME);
+        sqLiteDatabase.delete(PRODUCTS_TABLE_NAME, null, null);
     }
 }
