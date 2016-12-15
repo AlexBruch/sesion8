@@ -60,4 +60,8 @@ public class ItemsDatasource {
 
         sqLiteDatabase.insert(PRODUCTS_TABLE_NAME, null, values);
     }
+
+    public void cleanTable() {
+        sqLiteDatabase.execSQL("delete * from " + PRODUCTS_TABLE_NAME);
+    }
 }

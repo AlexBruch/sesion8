@@ -1,13 +1,19 @@
 package com.s8.lasalle.sesion8;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -21,8 +27,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+import Items.Producto;
 import sqllite.ItemsDatasource;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView Lista;
     private static String Jsonurl = "http://www.v2msoft.com/clientes/lasalle/curs-android/productos_supermercado.json";
     ArrayList<HashMap<String, String>> ProductosSupermercado;
+    List<Producto> entradas = new ArrayList<>();
     ListAdapter adapter;
     ItemsDatasource itemsDatasource;
 
@@ -45,12 +55,11 @@ public class MainActivity extends AppCompatActivity {
         ProductosSupermercado = new ArrayList<>();
         Lista = (ListView) findViewById(R.id.Lista);
 
-        //if de validacion si tenemos conexion
-
-        new GetProducts().execute();
-
-        //si no hubiese conexion
-        CargarSQLite();
+        if(isNetworkAvailable(this)) {
+            new GetProducts().execute();
+        } else {
+            CargarSQLite();
+        }
 
         Button update = (Button) findViewById(R.id.button);
         update.setOnClickListener(new View.OnClickListener() {
@@ -69,6 +78,22 @@ public class MainActivity extends AppCompatActivity {
 
     public void CargarSQLite(){
 
+        //itemsDatasource.cleanTable();
+        Cursor cursor = itemsDatasource.consultProducts();
+
+        while (cursor.moveToNext()) {
+            Producto columns = new Producto(
+                    cursor.getInt(0),
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    cursor.getString(3),
+                    cursor.getString(4)
+            );
+            entradas.add(columns);
+        }
+
+        AdaptadorSQL adaptadorSQL = new AdaptadorSQL(this, entradas);
+        Lista.setAdapter(adaptadorSQL);
     }
 
     private class GetProducts extends AsyncTask<Void, Void, Void> {
@@ -118,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                         product.put("precio", precio+"€");
                         product.put("stock", stock);
 
-                        //database
+                        // guardamos los datos en la base de datos
                         itemsDatasource.saveProduct(fabricante, nombre, precio, stock);
 
                         // adding contact to contact list
@@ -143,13 +168,13 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        CargarSQLite();
                         Toast.makeText(getApplicationContext(),
                                 "Could not get json from server.",
                                 Toast.LENGTH_LONG)
                                 .show();
                     }
                 });
-
             }
 
             return null;
@@ -196,6 +221,41 @@ public class MainActivity extends AppCompatActivity {
 
             Lista.setAdapter(adapter);
         }
+    }
+
+    class AdaptadorSQL extends ArrayAdapter<Producto> {
+
+        List<Producto> _data;
+
+        public AdaptadorSQL(Context context, List<Producto> data) {
+            super(context, R.layout.item_list, data);
+            _data = data;
+        }
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+            View view = layoutInflater.inflate(R.layout.item_list, null);
+
+            TextView manufacturer, product_name, price, stock;
+
+            manufacturer = (TextView) view.findViewById(R.id.manufacturer);
+            product_name = (TextView) view.findViewById(R.id.productname);
+            price = (TextView) view.findViewById(R.id.price);
+            stock = (TextView) view.findViewById(R.id.stock);
+
+            manufacturer.setText(_data.get(position).getMANUFACTURER());
+            product_name.setText(_data.get(position).getPRODUCT_NAME());
+            price.setText(_data.get(position).getPRICE());
+            stock.setText(_data.get(position).getSTOCK());
+
+            return(view);
+        }
+    }
+
+    public boolean isNetworkAvailable(final Context context) {
+        final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
+        return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
     }
 
 }
