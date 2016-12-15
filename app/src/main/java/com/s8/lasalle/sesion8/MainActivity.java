@@ -210,16 +210,15 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public View getView (int position, View convertView, ViewGroup parent) {
                     View view = super.getView(position, convertView, parent);
-                    TextView tv = (TextView) view.findViewById(R.id.stock);
-                    // TODO: Add null checks
-                    String s = tv.getText().toString();
-
 
                     if (position%2==0) {
                         view.setBackgroundColor(Color.parseColor("#d5efef"));
                     } else {
                         view.setBackgroundColor(Color.parseColor("#efefef"));
                     }
+
+                    TextView tv = (TextView) view.findViewById(R.id.stock);
+                    String s = tv.getText().toString();
                     int intStock = Integer.parseInt(s);
                     if(intStock <= 0){
                         tv.setBackgroundColor(Color.parseColor("#fd6955"));
@@ -264,6 +263,12 @@ public class MainActivity extends AppCompatActivity {
                 view.setBackgroundColor(Color.parseColor("#d5efef"));
             } else {
                 view.setBackgroundColor(Color.parseColor("#efefef"));
+            }
+            String s = stock.getText().toString();
+            int intStock = Integer.parseInt(s);
+            if(intStock <= 0){
+                stock.setBackgroundColor(Color.parseColor("#fd6955"));
+                stock.setTextColor(Color.parseColor("#780000"));
             }
 
             return(view);
