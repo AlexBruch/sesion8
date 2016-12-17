@@ -221,8 +221,10 @@ public class MainActivity extends AppCompatActivity {
                     String s = tv.getText().toString();
                     int intStock = Integer.parseInt(s);
                     if(intStock <= 0){
-                        tv.setBackgroundColor(Color.parseColor("#fd6955"));
+                        view.setBackgroundColor(Color.parseColor("#fd6955"));
                         tv.setTextColor(Color.parseColor("#780000"));
+                    } else {
+                        tv.setTextColor(Color.parseColor("#000000"));
                     }
 
                     return view;
@@ -267,8 +269,10 @@ public class MainActivity extends AppCompatActivity {
             String s = stock.getText().toString();
             int intStock = Integer.parseInt(s);
             if(intStock <= 0){
-                stock.setBackgroundColor(Color.parseColor("#fd6955"));
+                view.setBackgroundColor(Color.parseColor("#fd6955"));
                 stock.setTextColor(Color.parseColor("#780000"));
+            } else {
+                stock.setTextColor(Color.parseColor("#000000"));
             }
 
             return(view);
